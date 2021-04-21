@@ -1,6 +1,6 @@
-
 import React from 'react';
-import { StyleSheet, Text, View, Button, TextInput, } from 'react-native';
+import { StyleSheet, Button, Text, TextInput, View } from 'react-native';
+import { RadioButton } from 'react-native-paper';
 import {
   RecoilRoot,
   atom,
@@ -10,8 +10,9 @@ import {
   useSetRecoilState,
 } from 'recoil';
 
+
 const todoListState = atom({
-  key: 'todoListState',
+  key: 'todoListState', 
   default: [
     {id: 1, text: "Learn about React Native", isComplete: false},
     {id: 2, text: "Learn about Recoil", isComplete: false},
@@ -19,22 +20,91 @@ const todoListState = atom({
   ],
 });
 
-function Todolist() {
-  const todos = useRecoilValue(todoListState);
+const todoListFilterState = atom({
+  key: 'todoListFilterState',
+  default: 'Show All'
+});
+
+const filteredTodoListState = selector({
+  key: 'filteredTodoListState',
+  get: ({get}) =>{
+    const filter = get(todoListFilterState);
+    const list = get(todoListState);
+
+    switch(filter) {
+      case 'Show Completed':
+        return list.filter((item) => item.isComplete);
+      case 'Show Uncompleted':
+        return list.filter((item) => !item.isComplete);
+        default:
+          return list;
+    }
+  }
+})
+
+
+
+function TodoListFilters() {
+  const [filter, setFilter] = useRecoilState(todoListFilterState);
+
+  const updateFilter = (value) => {
+    setFilter(value);
+  };
+
+  return (
+    <View>
+      <Text>Filter:</Text>
+      <RadioButton.Group
+        onValueChange={value => updateFilter(value)} value={filter}>
+        <View>
+          <Text>All</Text>
+          <RadioButton value="Show All" />
+        </View>
+        <View>
+          <Text>Completed</Text>
+          <RadioButton value="Show Completed" />
+        </View>
+        <View>
+          <Text>Uncompleted</Text>
+          <RadioButton value="Show Uncompleted" />
+        </View>
+      </RadioButton.Group>
+    </View>
+  );
+}
+
+function GetStats(fullArr, completed, uncompleted ) {
+  let listNumTotal = fullArr.length;
+  let listNumCompleted  = completed.length;
+  let listNumUncompleted = uncompleted.length
+  let listNumPercent;
+    
+  const updateStats = () => {
+      setListNumTotal()
+  }
   return(
+      <View></View>
+  );
+  
+}
+
+function TodoList() {
+  const todos = useRecoilValue(filteredTodoListState);
+
+  return (
     <View style={styles.todoList}>
+      <TodoListFilters/>
+      <GetStats/>
       {todos.map((todoItem) => (
         <Todo key={todoItem.id} item={todoItem}/>
       ))}
-      <TodoForm />
+      <TodoForm/>
     </View>
   )
 }
 
-
-
-function Todo({item, key}) {
-  const [todoList, setTodoList] = useSetRecoilState(todoListState);
+function Todo({item}) {
+  const [todoList, setTodoList] = useRecoilState(todoListState);
   const index = todoList.findIndex((listItem) => listItem === item);
 
   const toggleItemCompletion = () => {
@@ -43,28 +113,37 @@ function Todo({item, key}) {
       isComplete: !item.isComplete,
     });
     setTodoList(newList);
-  }
+  };
+
+  const deleteItem = () => {
+    const newList = [...todoList];
+    newList.splice(index, 1);
+    setTodoList(newList);
+  };
+
+  
 
   function replaceItemAtIndex(arr, index, newValue) {
     return [...arr.slice(0, index), newValue, ...arr.slice(index + 1)];
   }
+  
 
-  return (
+  return(
     <View style={styles.todo}>
-      <Text style={{ textDecoration: item.isComplete ? "line-through" : ""}}>
+      <Text style={{ textDecoration: item.isComplete ? "line-through" : "" }}>
       {item.text}
-      </Text>
-      
+    </Text>
       <View style={{flexDirection: 'row', width: 200, alignContent: 'space-between'}}>
-        <Button onPress={() => toggleItemCompletion()} title="Complete"/>
-        <Button onPress={() => removeTodo(index)} title="X"/>
+        <Button onPress={toggleItemCompletion} title="Complete"/>
+        <Button onPress={deleteItem} title="X"/>
+        {/* <GetStats arr={todoList}/> */}
       </View>
     </View>
   );
-};
+}
 
 function TodoForm() {
-  const [value, setValue] = React.useState("")
+  const [text, setText] = React.useState("");
   const setTodoList = useSetRecoilState(todoListState);
 
   let id = 4;
@@ -72,35 +151,28 @@ function TodoForm() {
     return id++;
   }
 
-
-  // const handleSubmit = e => {
-  //   e.preventDefault();
-  //   if (!value) return; 
-  //   addTodo(value);
-  //   setValue("");
-  // };
-
   const addItem = () => {
-    if (!value) return;
-    setTodoList((oldList) => [
-      ...oldList,
+    if(text.length == 0) return;
+    setTodoList((oldTodoList) => [
+      ...oldTodoList,
       {
         id: getId(),
-        text: value,
+        text: text,
         isComplete: false,
-      }
+      },
     ]);
-    setValue("");
-  }
+    setText('');
+  };
 
-  return(
+  return (
     <View>
-      <TextInput style={styles.input} value={value}
-        onChange={e => setValue(e.target.value)}
+      <TextInput style={styles.input} value={text}
+        onChange={e => setText(e.target.value)}
         onKeyPress={e => {
-          if(e.keyCode == 13) addItem()
+          if(e.keyCode==13) addItem()
         }}
       />
+      <Button onPress={addItem} title="Add"/>
     </View>
   );
 }
@@ -109,42 +181,44 @@ function App() {
   return (
     <RecoilRoot>
       <View style={styles.app}>
-        <Todolist/>
+        <TodoList/>
       </View>
     </RecoilRoot>
   );
 }
 
-
-export default App;
-
 const styles = StyleSheet.create({
-  todo: {
-    flex: 'display',
-    flexDirection: "row",
-      height: 100,
-      padding: 20,
-    alignItems: 'center',
-    background: '#fff',
-    borderRadius: '3px',
-    boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.15)',
+  app: {
+    backgroundColor: '#209cee',
+    height: '100vh',
+    padding: '30px',
+  },
+  todoList: {
+    backgroundColor: '#e8e8e8',
+    borderRadius: 4,
+    maxWidth: '400px',
+    padding: '5px',
     display: 'flex',
-    fontSize: '12px',
+    flexDirection: 'column'
+  },
+  todo: {
+    flex: 1,
+    flexDirection: "row",
+    height: 100,
+    padding: 20,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 3,
+    display: 'flex',
+    fontSize: 12,
     justifyContent: 'space-between',
     marginBottom: '6px',
     padding: '3px 10px',
   },
-  app: {
-  background: '#209cee',
-  height: '100vh',
-  padding: '30px'
-  },
-  todoList: {
-  background: '#e8e8e8',
-  borderRadius: '4px',
-  maxWidth: '400px',
-  padding: '5px',
-  display:'flex',
-  flexFlow: 'column nowrap'
+  input: {
+    border: '2px grey solid',
+    margin: 4
   }
-})
+});
+
+export default App;
