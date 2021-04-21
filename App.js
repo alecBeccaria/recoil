@@ -79,11 +79,11 @@ function GetStats(fullArr, completed, uncompleted ) {
   let listNumUncompleted = uncompleted.length
   let listNumPercent;
     
-  const updateStats = () => {
-      setListNumTotal()
-  }
+
   return(
-      <View></View>
+      <View>
+        <Text>{listNumTotal}</Text>
+      </View>
   );
   
 }
@@ -94,7 +94,7 @@ function TodoList() {
   return (
     <View style={styles.todoList}>
       <TodoListFilters/>
-      <GetStats/>
+      {/* <GetStats fullArr={todoListState}/> */}
       {todos.map((todoItem) => (
         <Todo key={todoItem.id} item={todoItem}/>
       ))}
