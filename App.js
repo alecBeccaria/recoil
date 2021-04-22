@@ -74,14 +74,16 @@ function TodoListFilters() {
 }
 
 function GetStats() {
-  const todos = useRecoilValue(filteredTodoListState);
- for (let i = 0; i < array.length; i++) {
+  const todos = useRecoilValue(todoListState);
+  let listNumTotal;
+  let listNumComplete;
+  let listNumIncomplete;
+  let listNumPercent;
+ for (let i = 0; i < todos.length; i++) {
   todos.map((isComplete, i) => {
-      
+     
   })
  }
-
-  
   return(
       <View>
         <Text>{listNumTotal}</Text>
@@ -96,7 +98,7 @@ function TodoList() {
   return (
     <View style={styles.todoList}>
       <TodoListFilters/>
-      {/* <GetStats fullArr={todoListState}/> */}
+      <GetStats fullArr={todoListState}/>
       {todos.map((todoItem) => (
         <Todo key={todoItem.id} item={todoItem}/>
       ))}
