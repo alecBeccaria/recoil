@@ -220,9 +220,9 @@ const styles = StyleSheet.create({
     padding: '3px 10px',
   },
   input: {
-    border: '2px grey solid',
-    margin: 4
-  }
+    borderWidth: 1,
+
+  },
 });
 
 export default App;
