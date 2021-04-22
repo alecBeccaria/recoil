@@ -73,15 +73,15 @@ function TodoListFilters() {
   );
 }
 
-function GetStats(fullArr, completed, uncompleted ) {
-  let listNumTotal = fullArr.length;
-  let listNumCompleted  = completed.length;
-  let listNumUncompleted = uncompleted.length
-  let listNumPercent;
-    
-  const updateStats = () => {
-      setListNumTotal()
-  }
+function GetStats() {
+  const todos = useRecoilValue(filteredTodoListState);
+ for (let i = 0; i < array.length; i++) {
+  todos.map((isComplete, i) => {
+      
+  })
+ }
+
+  
   return(
       <View></View>
   );
