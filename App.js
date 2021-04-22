@@ -83,7 +83,9 @@ function GetStats() {
 
   
   return(
-      <View></View>
+      <View>
+        <Text>{listNumTotal}</Text>
+      </View>
   );
   
 }
@@ -94,7 +96,7 @@ function TodoList() {
   return (
     <View style={styles.todoList}>
       <TodoListFilters/>
-      <GetStats/>
+      {/* <GetStats fullArr={todoListState}/> */}
       {todos.map((todoItem) => (
         <Todo key={todoItem.id} item={todoItem}/>
       ))}
